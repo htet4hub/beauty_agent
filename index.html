@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Beauty & Style Pulse</title>
+    <!-- Include marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #fdfbf7;
+            --card-bg: #ffffff;
+            --primary-accent: #d4a373;
+            --primary-hover: #bc8a5f;
+            --text-color: #2b2d42;
+            --border-color: #e9ecef;
+            --user-msg-bg: #faedcd;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            height: 90vh;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        header {
+            padding: 20px;
+            background: #fefae0;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #d4a373;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .topics-bar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .topic-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .topic-btn:hover {
+            background: var(--primary-accent);
+            color: #fff;
+            border-color: var(--primary-accent);
+        }
+
+        #chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--user-msg-bg);
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.agent {
+            align-self: flex-start;
+            background-color: #f1f3f5;
+            border-bottom-left-radius: 2px;
+        }
+
+        .message .label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #6c757d;
+        }
+
+        /* --- Styling Rendered Markdown Tables --- */
+        .message table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+            font-size: 0.85rem;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .message th, .message td {
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .message th {
+            background-color: #fefae0;
+            color: #d4a373;
+            font-weight: 600;
+        }
+
+        .message ul, .message ol {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+
+        .message p {
+            margin: 6px 0;
+        }
+
+        /* Input Controls */
+        .input-area {
+            padding: 15px 20px;
+            background: #fff;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-accent);
+        }
+
+        button.send-btn {
+            background-color: var(--primary-accent);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button.send-btn:hover {
+            background-color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>✨ Global Beauty & Skincare Assistant</h1>
+            <p>Real-time trend analysis, routine advice & global beauty insights</p>
+        </header>
+
+        <div class="topics-bar">
+            <button class="topic-btn" onclick="sendQuickPrompt('What are the top trending global skincare ingredients right now?')">🌿 Skincare Trends</button>
+            <button class="topic-btn" onclick="sendQuickPrompt('Summarize the latest everyday minimal makeup routine tips.')">💄 Makeup Tips</button>
+            <button class="topic-btn" onclick="sendQuickPrompt('What are effective routines for healthy scalp and hair growth?')">✨ Haircare Advice</button>
+            <button class="topic-btn" onclick="sendQuickPrompt('Give me 3 essential sun protection tips for glass skin.')">☀️ Sun Protection</button>
+        </div>
+
+        <div id="chat-box">
+            <div class="message agent">
+                <div class="label">Beauty Agent</div>
+                Hello! I am your global beauty & wellness assistant. Ask me anything about skincare routines, makeup trends, or product formulations!
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Ask about beauty trends, routines, or ingredients..." onkeydown="if(event.key==='Enter') sendMessage()" />
+            <button class="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/api/chat';
+        const messageHistory = [];
+
+        function sendQuickPrompt(promptText) {
+            document.getElementById('user-input').value = promptText;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const inputField = document.getElementById('user-input');
+            const chatBox = document.getElementById('chat-box');
+            const userText = inputField.value.trim();
+
+            if (!userText) return;
+
+            messageHistory.push({ role: "user", content: userText });
+
+            chatBox.innerHTML += `
+                <div class="message user">
+                    <div class="label">You</div>
+                    ${escapeHtml(userText)}
+                </div>
+            `;
+            inputField.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const agentMsgId = 'agent-msg-' + Date.now();
+            chatBox.innerHTML += `
+                <div class="message agent" id="${agentMsgId}">
+                    <div class="label">Beauty Agent</div>
+                    <em>Thinking...</em>
+                </div>
+            `;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        prompt: userText,
+                        messages: messageHistory 
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP status ${response.status}`);
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                const agentElement = document.getElementById(agentMsgId);
+                
+                let buffer = "";
+                let latestResponseText = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n\n');
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        const trimmedLine = line.trim();
+                        if (trimmedLine.startsWith('data: ')) {
+                            const rawJson = trimmedLine.replace(/^data:\s*/, '');
+                            if (!rawJson) continue;
+
+                            try {
+                                const data = JSON.parse(rawJson);
+                                if (data.output) {
+                                    latestResponseText = data.output;
+                                    // Parse Markdown to formatted HTML via marked.parse()
+                                    const renderedHtml = marked.parse(latestResponseText);
+                                    agentElement.innerHTML = `
+                                        <div class="label">Beauty Agent</div>
+                                        ${renderedHtml}
+                                    `;
+                                    chatBox.scrollTop = chatBox.scrollHeight;
+                                }
+                            } catch (parseErr) {
+                                console.warn("Incomplete chunk...", parseErr);
+                            }
+                        }
+                    }
+                }
+
+                if (latestResponseText) {
+                    messageHistory.push({ role: "assistant", content: latestResponseText });
+                }
+
+            } catch (err) {
+                console.error("Fetch Exception:", err);
+                const agentElement = document.getElementById(agentMsgId);
+                agentElement.innerHTML = `
+                    <div class="label">Error</div>
+                    <span style="color:red;">Could not reach backend. Make sure 'python main.py' is running.</span>
+                `;
+            }
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
