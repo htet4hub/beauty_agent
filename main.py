@@ -39,6 +39,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "Global Beauty Assistant API is live!"}
 
 # Data Schemas
 class Message(BaseModel):
