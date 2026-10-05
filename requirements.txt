@@ -4,3 +4,4 @@ pydantic
 openai
 pydantic
 httpx
+python-dotenv
