@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import asyncio
+from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from typing import List, Dict, Optional
 from fastapi import FastAPI
@@ -44,14 +45,20 @@ async def lifespan(app: FastAPI):
     # Shutdown: Cancel the task cleanly when the server stops
     ping_task.cancel()
 
-# --- 2. Initialize Async OpenAI Client for Groq ---
-GROQ_KEY = os.getenv(
-    "GROQ_API_KEY", 
-    "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"
-)
 
+load_dotenv()
+
+# 2. Retrieve Groq API Key from environment
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+if not GROQ_API_KEY:
+    raise ValueError(
+        "GROQ_API_KEY is missing! Check your local .env file or Render Environment Variables."
+    )
+
+# 3. Initialize Async OpenAI Client for Groq Cloud
 client = AsyncOpenAI(
-    api_key=GROQ_KEY,
+    api_key=GROQ_API_KEY,
     base_url="https://api.groq.com/openai/v1"
 )
 
