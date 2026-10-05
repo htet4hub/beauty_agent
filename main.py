@@ -1,17 +1,50 @@
 import os
 import json
 import logging
+import asyncio
+from contextlib import asynccontextmanager
 from typing import List, Dict, Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from openai import AsyncOpenAI
+import httpx
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-# --- 1. Initialize Async OpenAI Client for Groq ---
+# --- 1. Self-Ping Background Task Definition ---
+RENDER_APP_URL = os.getenv(
+    "RENDER_EXTERNAL_URL", 
+    "https://beauty-agent-backends.onrender.com/"
+)
+
+async def keep_alive_ping():
+    """Background loop that pings the app every 10 minutes to prevent Render auto-sleep."""
+    # Wait 10 seconds after server boot before starting the loop
+    await asyncio.sleep(10)
+    async with httpx.AsyncClient() as client:
+        while True:
+            try:
+                logging.info(f"Sending keep-alive self-ping to {RENDER_APP_URL}")
+                response = await client.get(RENDER_APP_URL, timeout=10.0)
+                logging.info(f"Self-ping response status: {response.status_code}")
+            except Exception as e:
+                logging.warning(f"Self-ping keep-alive failed: {str(e)}")
+            
+            # Wait 10 minutes (600 seconds) between pings
+            await asyncio.sleep(600)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Start the keep-alive task in the background
+    ping_task = asyncio.create_task(keep_alive_ping())
+    yield
+    # Shutdown: Cancel the task cleanly when the server stops
+    ping_task.cancel()
+
+# --- 2. Initialize Async OpenAI Client for Groq ---
 GROQ_KEY = os.getenv(
     "GROQ_API_KEY", 
     "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"
@@ -29,8 +62,8 @@ MODEL_PRIORITY_LIST = [
     "openai/gpt-oss-120b"
 ]
 
-# --- 2. FastAPI Setup ---
-app = FastAPI(title="Global Beauty Assistant API")
+# --- 3. FastAPI Setup ---
+app = FastAPI(title="Global Beauty Assistant API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,6 +72,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 @app.get("/")
 async def root():
     return {"status": "ok", "message": "Global Beauty Assistant API is live!"}
@@ -52,7 +86,7 @@ class ChatRequest(BaseModel):
     prompt: Optional[str] = None
     messages: Optional[List[Message]] = None
 
-# --- 3. Streaming Chat Endpoint ---
+# --- 4. Streaming Chat Endpoint ---
 @app.post("/api/chat")
 async def chat_endpoint(request: ChatRequest):
     async def event_generator():
